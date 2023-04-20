@@ -13,7 +13,8 @@ export const handlePrompt = async(conversation: Conversation, prompt: string) =>
   const generalSettings = getGeneralSettings()
   const provider = getProviderById(conversation?.providerId)
   if (!provider) return
-  let callMethod = generalSettings.requestWithBackend ? 'backend' : 'backend' as 'frontend' | 'backend'
+  // let callMethod = generalSettings.requestWithBackend ? 'backend' : 'frontend' as 'frontend' | 'backend'
+  let callMethod = 'backend' as 'frontend' | 'backend'
   if (provider.supportCallMethod === 'frontend' || provider.supportCallMethod === 'backend')
     callMethod = provider.supportCallMethod
 
@@ -103,7 +104,8 @@ const getProviderResponse = async(caller: 'frontend' | 'backend', payload: CallP
 // Called by both client and server
 export const callProviderHandler = async(payload: CallProviderPayload) => {
   console.log('callProviderHandler', payload)
-
+  const apiKey = import.meta.env.OPENAI_API_KEY
+  const baseUrl = import.meta.env.OPENAI_API_BASE_URL
   const { conversationMeta, providerId, prompt, historyMessages } = payload
   const provider = getProviderById(providerId)
   if (!provider) return
@@ -111,7 +113,7 @@ export const callProviderHandler = async(payload: CallProviderPayload) => {
   let response: PromptResponse
   const handlerPayload: HandlerPayload = {
     conversationId: conversationMeta.id,
-    globalSettings: payload.globalSettings,
+    globalSettings: { apiKey, baseUrl, ...payload.globalSettings },
     conversationSettings: {},
     systemRole: '',
     mockMessages: [],
